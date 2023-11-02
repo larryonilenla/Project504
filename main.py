@@ -90,7 +90,7 @@ app.layout = dash.html.Div(
             justify="center",
         ),
         # Line chart
-        html.Div(dcc.Graph(id='count-chart'), style={'width': '50%', 'display': 'inline-block'}),
+        html.Div(dcc.Graph(id='line-chart'), style={'width': '50%', 'display': 'inline-block'}),
 
         # Bar chart
         html.Div(dcc.Graph(id='column-chart'), style={'width': '50%', 'display': 'inline-block'}),
@@ -104,7 +104,7 @@ app.layout = dash.html.Div(
 
 # Define callback functions to update graphs
 @app.callback(
-    Output('count-chart', 'figure'),
+    Output('line-chart', 'figure'),
     Output('column-chart', 'figure'),
     Output('pie-chart', 'figure'),
     Input('outbreak-setting-dropdown', 'value'),
@@ -118,9 +118,12 @@ def update_graphs(selected_settings, start_date, end_date):
     if selected_settings:
         filtered_df = filtered_df[filtered_df['Outbreak Setting'].isin(selected_settings)]
 
-    # Update line Plot
-    count_fig = px.histogram(filtered_df, x=filtered_df['Institution Name'].str[:15],  # Truncate to first 20 characters
-                             title='Institution Counts')
+    # Update Line Chart (line chart)
+    line_fig = px.line(filtered_df, x=filtered_df['Date Outbreak Began'], y=filtered_df['Active'],
+                      title='Active Outbreaks Over Time')
+    
+    line_fig.update_layout(yaxis=dict(autorange="reversed"))
+
 
     # Update Column Chart (replacing bar chart)
     column_fig = go.Figure(data=[
@@ -135,7 +138,7 @@ def update_graphs(selected_settings, start_date, end_date):
     # Adjust the size of the Pie Chart
     pie_fig.update_layout(height=700, width=1000)  # You can adjust the height and width as needed
 
-    return count_fig, column_fig, pie_fig
+    return line_fig, column_fig, pie_fig
 
 
 if __name__ == "__main__":
